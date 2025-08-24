@@ -82,7 +82,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     try {
       await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true })
       setUser(null)
-      router.push("/login")
+      router.push("/")
     } catch (err) {
       console.error("Erro ao deslogar:", err)
     }
