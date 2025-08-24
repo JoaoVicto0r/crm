@@ -13,9 +13,19 @@ export interface User {
 }
 
 export interface DashboardData {
-  totalUsers: number;
-  activeUsers: number;
-  inactiveUsers: number;
+  totalTickets: number
+  contatosAtivos: number
+  tempoMedio: string
+  taxaResolucao: number
+
+  // Charts
+  weeklyData: { day: string; tickets: number; messages: number }[]
+  hourlyData: { hour: string; count: number }[]
+  statusData: { name: string; value: number; color: string }[]
+  userAttendanceData: { name: string; value: number; color: string }[]
+  channelData: { name: string; value: number; color: string }[]
+  connectionData: { name: string; value: number; color: string }[]
+  demandData: { name: string; value: number; color: string }[]
 }
 
 // ====================== INSTANCE ======================
