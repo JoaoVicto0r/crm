@@ -11,7 +11,7 @@ import { Users, MessageSquare, Clock, CheckCircle } from "lucide-react"
 import { getDashboardData, DashboardData } from "../../utils/api"
 
 // ====================== COMPONENTS ======================
-function CustomPieChart({ data, title }: { data: any[]; title: string }) {
+function CustomPieChart({ data, title }: { data: { name: string; value: number; color: string }[]; title: string }) {
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader className="pb-2">
@@ -24,7 +24,15 @@ function CustomPieChart({ data, title }: { data: any[]; title: string }) {
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={2} dataKey="value">
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={40}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
+              >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -164,23 +172,26 @@ export function DashboardContent() {
   if (loading) return <p className="text-white">Carregando...</p>
   if (!dashboard) return <p className="text-red-500">Erro ao carregar dados</p>
 
-  // Mock data para gráficos caso a API não forneça todos
-  const weeklyData = dashboard.weeklyData || []
-  const hourlyData = dashboard.hourlyData || []
-  const statusData = dashboard.statusData || []
-  const userAttendanceData = dashboard.userAttendanceData || []
-  const channelData = dashboard.channelData || []
-  const connectionData = dashboard.connectionData || []
-  const demandData = dashboard.demandData || []
+  // fallback caso a API não forneça arrays
+  const weeklyData = dashboard.weeklyData ?? []
+  const hourlyData = dashboard.hourlyData ?? []
+  const statusData = dashboard.statusData ?? []
+  const userAttendanceData = dashboard.userAttendanceData ?? []
+  const channelData = dashboard.channelData ?? []
+  const connectionData = dashboard.connectionData ?? []
+  const demandData = dashboard.demandData ?? []
+  const ticketsTable = dashboard.ticketsTable ?? []
+  const usersTable = dashboard.usersTable ?? []
 
   return (
     <div className="space-y-6">
-      {/* Metrics Cards */}
+
+      {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard title="Total de Tickets" value={dashboard.totalTickets?.toString() || "0"} change="+12.5%" icon={MessageSquare} trend="up" />
-        <MetricCard title="Contatos Ativos" value={dashboard.contatosAtivos?.toString() || "0"} change="+8.2%" icon={Users} trend="up" />
-        <MetricCard title="Tempo Médio" value={dashboard.tempoMedio || "0m"} change="-15.3%" icon={Clock} trend="down" />
-        <MetricCard title="Taxa de Resolução" value={`${dashboard.taxaResolucao?.toFixed(1) || 0}%`} change="+2.1%" icon={CheckCircle} trend="up" />
+        <MetricCard title="Total de Tickets" value={dashboard.totalTickets.toString()} change="+12.5%" icon={MessageSquare} trend="up" />
+        <MetricCard title="Contatos Ativos" value={dashboard.contatosAtivos.toString()} change="+8.2%" icon={Users} trend="up" />
+        <MetricCard title="Tempo Médio" value={dashboard.tempoMedio} change="-15.3%" icon={Clock} trend="down" />
+        <MetricCard title="Taxa de Resolução" value={`${dashboard.taxaResolucao.toFixed(1)}%`} change="+2.1%" icon={CheckCircle} trend="up" />
       </div>
 
       {/* Charts */}
@@ -197,6 +208,71 @@ export function DashboardContent() {
         <CustomPieChart data={connectionData} title="Status das Conexões" />
         <CustomPieChart data={demandData} title="Atendimento por Demanda" />
       </div>
+
+      {/* Tabelas */}
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-white">Tickets Recentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full text-left text-gray-300">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">ID</th>
+                  <th className="px-4 py-2">Título</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Responsável</th>
+                  <th className="px-4 py-2">Criado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ticketsTable.map((ticket) => (
+                  <tr key={ticket.id}>
+                    <td className="px-4 py-2">{ticket.id}</td>
+                    <td className="px-4 py-2">{ticket.title}</td>
+                    <td className="px-4 py-2">{ticket.status}</td>
+                    <td className="px-4 py-2">{ticket.assignedTo}</td>
+                    <td className="px-4 py-2">{ticket.createdAt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-white">Usuários Recentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full text-left text-gray-300">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">ID</th>
+                  <th className="px-4 py-2">Nome</th>
+                  <th className="px-4 py-2">Email</th>
+                  <th className="px-4 py-2">Função</th>
+                  <th className="px-4 py-2">Último Login</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usersTable.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-4 py-2">{user.id}</td>
+                    <td className="px-4 py-2">{user.name}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.role}</td>
+                    <td className="px-4 py-2">{user.lastLogin}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

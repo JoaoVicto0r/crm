@@ -13,20 +13,40 @@ export interface User {
 }
 
 export interface DashboardData {
-  totalTickets: number
-  contatosAtivos: number
-  tempoMedio: string
-  taxaResolucao: number
+  totalTickets: number;
+  contatosAtivos: number;
+  tempoMedio: string;
+  taxaResolucao: number;
 
-  // Charts
-  weeklyData: { day: string; tickets: number; messages: number }[]
-  hourlyData: { hour: string; count: number }[]
-  statusData: { name: string; value: number; color: string }[]
-  userAttendanceData: { name: string; value: number; color: string }[]
-  channelData: { name: string; value: number; color: string }[]
-  connectionData: { name: string; value: number; color: string }[]
-  demandData: { name: string; value: number; color: string }[]
+  // Gráficos
+  weeklyData: { day: string; tickets: number; messages: number }[];
+  hourlyData: { hour: string; count: number }[];
+
+  // Pies
+  statusData: { name: string; value: number; color: string }[];
+  userAttendanceData: { name: string; value: number; color: string }[];
+  channelData: { name: string; value: number; color: string }[];
+  connectionData: { name: string; value: number; color: string }[];
+  demandData: { name: string; value: number; color: string }[];
+
+  // Tabelas (exemplo)
+  ticketsTable: {
+    id: number;
+    title: string;
+    status: string;
+    assignedTo: string;
+    createdAt: string;
+  }[];
+
+  usersTable: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    lastLogin: string;
+  }[];
 }
+
 
 // ====================== INSTANCE ======================
 const api = axios.create({
