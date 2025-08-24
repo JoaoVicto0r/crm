@@ -57,14 +57,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+
   // Buscar usuário logado
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get<User>(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-          { withCredentials: true }
-        )
+        const { data } = await axios.get<User>(`${API_URL}/users/me`, {
+          withCredentials: true, // envia cookies/sessão
+        })
         setUser(data)
       } catch (err: any) {
         console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
@@ -74,16 +75,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       }
     }
     fetchUser()
-  }, [router])
+  }, [router, API_URL])
 
-  // Logout
+  // Função de logout
   const handleLogout = async () => {
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
-        {},
-        { withCredentials: true }
-      )
+      await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true })
       setUser(null)
       router.push("/login")
     } catch (err) {
@@ -164,7 +161,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-blue-600 text-white">
-                  {user?.name.charAt(0) || "U"}
+                  {user?.name.charAt(0) || "AD"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
