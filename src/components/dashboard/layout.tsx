@@ -58,10 +58,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get("/users/me") // ajuste a URL conforme seu backend
+        // Coloque aqui a URL completa do backend
+        const { data } = await axios.get<User>(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/users/me`,
+          { withCredentials: true } // se estiver usando cookies/sessão
+        )
         setUser(data)
-      } catch (err) {
-        console.error("Erro ao buscar usuário logado:", err)
+      } catch (err: any) {
+        console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
       }
     }
     fetchUser()
