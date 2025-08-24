@@ -60,7 +60,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       try {
         // Coloque aqui a URL completa do backend
         const { data } = await axios.get<User>(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/users/me`,
+          `${process.env.NEXT_PUBLIC_API_URL || "https://api-royal-production.up.railway.app"}/users/me`,
           { withCredentials: true } // se estiver usando cookies/sessão
         )
         setUser(data)
