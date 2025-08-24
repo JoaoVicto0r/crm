@@ -55,20 +55,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Buscar usuário logado
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const { data } = await axios.get<User>(
-          `${process.env.NEXT_PUBLIC_API_URL || "https://api-royal-production.up.railway.app"}/users/me`,
-          { withCredentials: true } // se estiver usando cookies/sessão
+          `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+          { withCredentials: true } // garante envio de cookies de sessão
         )
         setUser(data)
       } catch (err: any) {
         console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
-        // Redireciona para login se não tiver user
         router.push("/login")
+      } finally {
+        setLoading(false)
       }
     }
     fetchUser()
@@ -94,6 +96,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     ...item,
     active: item.href === currentPath,
   }))
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
+        Carregando usuário...
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -154,14 +164,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-blue-600 text-white">
-                  {user ? user.name.charAt(0) : "AD"}
+                  {user?.name.charAt(0) || "AD"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
-                  {user ? user.name : "Carregando..."}
+                  {user?.name || "Desconhecido"}
                 </p>
-                <p className="text-xs text-gray-400 truncate">{user ? user.email : ""}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email || ""}</p>
               </div>
               <Button
                 variant="ghost"
