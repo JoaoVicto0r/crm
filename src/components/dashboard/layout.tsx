@@ -63,7 +63,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       try {
         const { data } = await axios.get<User>(
           `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-          { withCredentials: true } // garante envio de cookies de sessão
+          { withCredentials: true }
         )
         setUser(data)
       } catch (err: any) {
@@ -76,7 +76,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     fetchUser()
   }, [router])
 
-  // Função de logout
+  // Logout
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -164,14 +164,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-blue-600 text-white">
-                  {user?.name.charAt(0) || "AD"}
+                  {user?.name.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {user?.name || "Desconhecido"}
-                </p>
-                <p className="text-xs text-gray-400 truncate">{user?.email || ""}</p>
+                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
               </div>
               <Button
                 variant="ghost"
