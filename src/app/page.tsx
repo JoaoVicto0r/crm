@@ -6,7 +6,7 @@ import { Input } from "../components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Label } from "../components/ui/label"
 import { Eye, EyeOff } from "lucide-react"
-import api from "../utils/api" // 🔑 importa sua instância axios configurada para cookies
+import api from "../utils/api" 
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -21,10 +21,10 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // Faz login chamando sua API
+      
       await api.post("/auth/login", { email, password })
 
-      // Redireciona para dashboard se login OK
+     
       window.location.href = "/dashboard"
     } catch (err: any) {
       setError(err.response?.data?.message || "Erro ao fazer login")

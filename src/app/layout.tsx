@@ -7,7 +7,7 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "ROYAL CRM - Sistema de Gestão de Atendimento",
   description: "Sistema completo de CRM e gestão de atendimento",
-  generator: "v0.app",
+  generator: "Royal Sistemas",
 }
 
 export default function RootLayout({

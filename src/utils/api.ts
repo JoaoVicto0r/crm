@@ -12,6 +12,12 @@ export interface User {
   updatedAt: string;
 }
 
+export interface DashboardData {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+}
+
 // ====================== INSTANCE ======================
 const api = axios.create({
   baseURL: "https://api-royal-production.up.railway.app",
@@ -29,6 +35,14 @@ export const login = async (email: string, password: string): Promise<User> => {
   return data;
 };
 
+// ====================== DASHBOARD ======================
+export const getDashboardData = async (): Promise<DashboardData> => {
+  const { data } = await api.get("/dashboard");
+  // Suporte para wrapper { dashboard: {...} } ou objeto direto
+  if (data.dashboard) return data.dashboard as DashboardData;
+  return data as DashboardData;
+};
+
 // ====================== REFRESH TOKEN ======================
 let isRefreshing = false;
 let refreshSubscribers: (() => void)[] = [];
@@ -42,7 +56,7 @@ const onTokenRefreshed = () => {
   refreshSubscribers = [];
 };
 
-// Interceptor usando tipos genéricos do Axios
+// Interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error: any) => {
