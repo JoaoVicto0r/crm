@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import {
@@ -24,9 +23,15 @@ import {
   Bell,
 } from "lucide-react"
 import { cn } from "../../lib/utils"
+import  api  from "../../utils/api"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
+}
+
+interface UserData {
+  name: string
+  email: string
 }
 
 const menuItems = [
@@ -48,6 +53,20 @@ const menuItems = [
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [user, setUser] = useState<UserData | null>(null)
+
+  // Pega dados do usuário logado
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get<UserData>("/me")
+        setUser(res.data)
+      } catch (err) {
+        console.error("Erro ao buscar usuário logado:", err)
+      }
+    }
+    fetchUser()
+  }, [])
 
   const currentPath = typeof window !== "undefined" ? window.location.pathname : ""
   const updatedMenuItems = menuItems.map((item) => ({
@@ -110,11 +129,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                <AvatarFallback className="bg-blue-600 text-white">AD</AvatarFallback>
+                <AvatarFallback className="bg-blue-600 text-white">
+                  {user?.name ? user.name[0] : "AD"}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">Admin</p>
-                <p className="text-xs text-gray-400 truncate">admin@royal.com</p>
+                <p className="text-sm font-medium text-white truncate">{user?.name || "Carregando..."}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email || "..."}</p>
               </div>
               <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
                 <LogOut className="h-4 w-4" />
