@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "../../components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import {
   LayoutDashboard,
   Users,
@@ -51,6 +52,7 @@ const menuItems = [
 ]
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
@@ -58,7 +60,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Coloque aqui a URL completa do backend
         const { data } = await axios.get<User>(
           `${process.env.NEXT_PUBLIC_API_URL || "https://api-royal-production.up.railway.app"}/users/me`,
           { withCredentials: true } // se estiver usando cookies/sessão
@@ -66,10 +67,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         setUser(data)
       } catch (err: any) {
         console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
+        // Redireciona para login se não tiver user
+        router.push("/login")
       }
     }
     fetchUser()
-  }, [])
+  }, [router])
+
+  // Função de logout
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://api-royal-production.up.railway.app"}/auth/logout`,
+        {},
+        { withCredentials: true }
+      )
+      setUser(null)
+      router.push("/login")
+    } catch (err) {
+      console.error("Erro ao deslogar:", err)
+    }
+  }
 
   const currentPath = typeof window !== "undefined" ? window.location.pathname : ""
   const updatedMenuItems = menuItems.map((item) => ({
@@ -145,7 +163,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </p>
                 <p className="text-xs text-gray-400 truncate">{user ? user.email : ""}</p>
               </div>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white"
+                onClick={handleLogout}
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
