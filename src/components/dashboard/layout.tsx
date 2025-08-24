@@ -80,7 +80,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://api-royal-production.up.railway.app"}/auth/logout`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
         {},
         { withCredentials: true }
       )
