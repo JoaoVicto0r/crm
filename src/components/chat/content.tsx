@@ -130,31 +130,33 @@ export function ChatContent() {
 
   // ----------- Conexão WebSocket -----------
   useEffect(() => {
-    socketRef.current = io("https://api-royal-production.up.railway.app") // URL do backend
+  socketRef.current = io("https://api-royal-production.up.railway.app"); // URL do backend
 
-    // Recebe nova mensagem
-    socketRef.current.on("newMessage", (msg: any) => {
-      console.log("Nova mensagem:", msg)
-      // Atualize o ticket correspondente aqui se quiser
-    })
+  // Recebe nova mensagem
+  socketRef.current.on("newMessage", (msg: any) => {
+    console.log("Nova mensagem:", msg);
+    // Atualize o ticket correspondente aqui se quiser
+  });
 
-    // Recebe QR code
-    socketRef.current.on("qrCode", (qr: string) => {
-      console.log("QR recebido:", qr);
-      setQrCode(qr);
-    })
+  // Recebe QR code
+  socketRef.current.on("qrCode", (qr: string) => {
+    console.log("QR recebido:", qr);
+    if (qr) {
+      // Remove vírgulas ou caracteres extras para o QRCode
+      const cleanQr = qr.replace(/,/g, '');
+      setQrCode(cleanQr);
+    }
+  });
 
-    // Recebe status de conexão
-    socketRef.current.on("whatsapp:connected", () => {
-      setWhatsappConnected(true)
-      setQrCode(null)
-    })
-    socketRef.current.on("qrCode", (qr: string) => {
-  if (qr) setQrCode(qr)
-    })
+  // Recebe status de conexão
+  socketRef.current.on("whatsapp:connected", () => {
+    setWhatsappConnected(true);
+    setQrCode(null);
+  });
 
-    return () => socketRef.current.disconnect()
-  }, [])
+  return () => socketRef.current.disconnect();
+}, []);
+
 
   const filteredTickets = tickets.filter(
     (ticket) =>
