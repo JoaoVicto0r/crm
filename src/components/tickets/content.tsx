@@ -1,3 +1,4 @@
+// src/components/tickets/content.tsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -19,17 +20,21 @@ export default function TicketsContent() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchTickets();
   }, []);
 
   const fetchTickets = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get('/api/tickets');
+      const res = await axios.get('/api/tickets?tenantId=1');
       setTickets(res.data);
     } catch (err) {
       console.error('Erro ao buscar tickets:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,7 +45,7 @@ export default function TicketsContent() {
       await axios.post(`/api/tickets/${selectedTicket.id}/messages`, {
         body: newMessage,
         fromMe: true,
-        userId: null, // ajuste conforme usuário logado
+        userId: null, // ajuste se tiver usuário logado
       });
       setNewMessage('');
       fetchTickets();
@@ -54,7 +59,8 @@ export default function TicketsContent() {
       {/* Lista de Tickets */}
       <div className="w-1/3 border-r border-gray-200 h-full overflow-y-auto">
         <h2 className="font-bold mb-2">Tickets</h2>
-        {tickets.map(ticket => (
+        {loading && <p>Carregando tickets...</p>}
+        {tickets.map((ticket) => (
           <div
             key={ticket.id}
             className="p-2 cursor-pointer hover:bg-gray-100"
@@ -71,7 +77,8 @@ export default function TicketsContent() {
           <>
             <h2 className="font-bold mb-2">Mensagens</h2>
             <div className="flex-1 overflow-y-auto border p-2 mb-2">
-              {selectedTicket.Messages.map(msg => (
+              {selectedTicket.Messages.length === 0 && <p>Nenhuma mensagem</p>}
+              {selectedTicket.Messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`mb-2 p-2 rounded ${
@@ -87,7 +94,7 @@ export default function TicketsContent() {
                 type="text"
                 className="flex-1 border p-2 rounded"
                 value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
+                onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Digite sua mensagem"
               />
               <button
