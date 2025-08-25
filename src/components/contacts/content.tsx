@@ -90,42 +90,42 @@ export function ContactsContent() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getContacts()
-      .then((data) => {
-        const contactsFromApi: Contact[] = data.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          firstName: c.firstName,
-          lastName: c.lastName,
-          businessName: c.businessName,
-          number: c.number ?? undefined, // garante que não seja null
+  getContacts()
+    .then((data) => {
+      const contactsFromApi: Contact[] = data.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        businessName: c.businessName,
+        number: c.number ?? undefined,
+        email: c.email ?? undefined,
+        profilePicUrl: c.profilePicUrl,
+        isGroup: !!c.isGroup,
+        isWAContact: !!c.isWAContact,
+        pushname: c.pushname,
+        telegramId: c.telegramId?.toString(),
+        instagramPK: c.instagramPK?.toString(),
+        messengerId: c.messengerId,
+        birthdayDate: c.birthdayDate,
+        cpf: c.cpf,
+        tags: Array.isArray(c.tags) ? c.tags : [],
+        channels: {
+          whatsapp: c.isWAContact ? c.number ?? undefined : undefined,
           email: c.email ?? undefined,
-          profilePicUrl: c.profilePicUrl,
-          isGroup: c.isGroup ?? false,
-          isWAContact: c.isWAContact ?? false,
-          pushname: c.pushname,
-          telegramId: c.telegramId ?? undefined,
-          instagramPK: c.instagramPK ?? undefined,
-          messengerId: c.messengerId,
-          birthdayDate: c.birthdayDate,
-          cpf: c.cpf,
-          tags: c.tags ?? [],
-          channels: {
-            whatsapp: c.isWAContact ? c.number ?? undefined : undefined,
-            email: c.email ?? undefined,
-            telegram: c.telegramId ?? undefined,
-            instagram: c.instagramPK ?? undefined,
-            phone: c.number ?? undefined,
-          },
-          lastInteraction: c.updatedAt ?? c.createdAt,
-          totalTickets: c.Tickets?.length ?? 0,
-          createdAt: c.createdAt,
-          Tickets: c.Tickets ?? [],
-        }))
-        setContacts(contactsFromApi)
-      })
-      .finally(() => setLoading(false))
-  }, [])
+          telegram: c.telegramId?.toString(),
+          instagram: c.instagramPK?.toString(),
+          phone: c.number ?? undefined,
+        },
+        lastInteraction: c.updatedAt ?? c.createdAt,
+        totalTickets: Array.isArray(c.Tickets) ? c.Tickets.length : 0,
+        createdAt: c.createdAt,
+        Tickets: Array.isArray(c.Tickets) ? c.Tickets : [],
+      }))
+      setContacts(contactsFromApi)
+    })
+    .finally(() => setLoading(false))
+}, [])
 
   const filteredContacts = contacts.filter((contact) => {
     const matchesSearch =
