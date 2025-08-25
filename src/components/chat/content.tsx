@@ -123,6 +123,7 @@ export function ChatContent() {
   const [whatsappConnected, setWhatsappConnected] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const socketRef = useRef<any>(null)
+  
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   useEffect(() => { scrollToBottom() }, [selectedTicket?.messages])
@@ -147,6 +148,9 @@ export function ChatContent() {
     socketRef.current.on("whatsapp:connected", () => {
       setWhatsappConnected(true)
       setQrCode(null)
+    })
+    socketRef.current.on("qrCode", (qr: string) => {
+  if (qr) setQrCode(qr)
     })
 
     return () => socketRef.current.disconnect()
@@ -185,11 +189,11 @@ export function ChatContent() {
       {!whatsappConnected && (
         <Card className="flex flex-col items-center justify-center p-4 bg-gray-900 border-gray-800 w-80">
           <p className="text-white mb-2">Escaneie o QR code com WhatsApp Web</p>
-          {qrCode ? (
-            <QRCode value={qrCode} size={200} />
-          ) : (
-            <p className="text-gray-400">Aguardando QR code...</p>
-          )}
+         {qrCode ? (
+          <QRCode value={qrCode} size={200} />
+        ) : (
+          <p className="text-gray-400">Aguardando QR code...</p>
+        )}
         </Card>
       )}
 
