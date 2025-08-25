@@ -29,7 +29,7 @@ export default function TicketsContent() {
       const res = await axios.get('/api/tickets');
       setTickets(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao buscar tickets:', err);
     }
   };
 
@@ -40,18 +40,19 @@ export default function TicketsContent() {
       await axios.post(`/api/tickets/${selectedTicket.id}/messages`, {
         body: newMessage,
         fromMe: true,
-        userId: null,
+        userId: null, // ajuste se tiver usuário logado
       });
       setNewMessage('');
       fetchTickets();
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao enviar mensagem:', err);
     }
   };
 
   return (
-    <div className="flex gap-4 p-4">
-      <div className="w-1/3 border-r border-gray-200">
+    <div className="flex gap-4 p-4 h-full">
+      {/* Lista de Tickets */}
+      <div className="w-1/3 border-r border-gray-200 h-full overflow-y-auto">
         <h2 className="font-bold mb-2">Tickets</h2>
         {tickets.map(ticket => (
           <div
@@ -64,11 +65,12 @@ export default function TicketsContent() {
         ))}
       </div>
 
-      <div className="w-2/3 p-2">
+      {/* Mensagens do ticket */}
+      <div className="w-2/3 p-2 flex flex-col h-full">
         {selectedTicket ? (
           <>
             <h2 className="font-bold mb-2">Mensagens</h2>
-            <div className="h-64 overflow-y-auto border p-2 mb-2">
+            <div className="flex-1 overflow-y-auto border p-2 mb-2">
               {selectedTicket.Messages.map(msg => (
                 <div
                   key={msg.id}
@@ -80,12 +82,13 @@ export default function TicketsContent() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-auto">
               <input
                 type="text"
                 className="flex-1 border p-2 rounded"
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
+                placeholder="Digite sua mensagem"
               />
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded"
