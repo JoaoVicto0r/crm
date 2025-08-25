@@ -47,6 +47,19 @@ export interface DashboardData {
   }[];
 }
 
+export interface Contact {
+  id: number;
+  name: string;
+  number?: string | null;
+  email?: string | null;
+  pushname?: string | null;
+  isWAContact?: boolean | null;
+  isUser?: boolean | null;
+  tenantId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 // ====================== INSTANCE ======================
 const api = axios.create({
@@ -72,6 +85,14 @@ export const getDashboardData = async (): Promise<DashboardData> => {
   if (data.dashboard) return data.dashboard as DashboardData;
   return data as DashboardData;
 };
+
+// ====================== CONTACTS ======================
+
+export const getContacts = async (): Promise<Contact[]> => {
+  const { data } = await api.get<Contact[]>("/contacts");
+  return data;
+};
+
 
 // ====================== REFRESH TOKEN ======================
 let isRefreshing = false;

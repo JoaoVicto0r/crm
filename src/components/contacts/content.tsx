@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -9,20 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import {
-  Search,
-  MoreHorizontal,
-  MessageSquare,
-  Phone,
-  Mail,
-  Users,
-  UserPlus,
-  Calendar,
-  Building,
-  Instagram,
-  Send,
-} from "lucide-react"
+import { Search, MoreHorizontal, MessageSquare, Phone, Mail, Users, UserPlus, Calendar, Building, Instagram, Send } from "lucide-react"
+import { getContacts } from "../../utils/api"
 
+// Tipagem de Ticket
+interface Ticket {
+  id: number
+  title: string
+  status: string
+  assignedTo?: string
+  createdAt: string
+}
+
+// Tipagem do contato
 interface Contact {
   id: number
   name: string
@@ -51,105 +50,10 @@ interface Contact {
   lastInteraction: string
   totalTickets: number
   createdAt: string
+  Tickets?: Ticket[]
 }
 
-const mockContacts: Contact[] = [
-  {
-    id: 1,
-    name: "João Silva",
-    firstName: "João",
-    lastName: "Silva",
-    number: "+55 11 99999-9999",
-    email: "joao@email.com",
-    profilePicUrl: "/placeholder.svg?height=40&width=40",
-    isGroup: false,
-    isWAContact: true,
-    pushname: "João Silva",
-    birthdayDate: "1990-05-15",
-    cpf: "123.456.789-00",
-    tags: ["VIP", "Cliente"],
-    channels: {
-      whatsapp: "+55 11 99999-9999",
-      email: "joao@email.com",
-    },
-    lastInteraction: "2025-08-23T11:30:00Z",
-    totalTickets: 5,
-    createdAt: "2025-01-15T10:00:00Z",
-  },
-  {
-    id: 2,
-    name: "Empresa ABC Ltda",
-    businessName: "Empresa ABC Ltda",
-    number: "+55 11 88888-8888",
-    email: "contato@empresaabc.com",
-    isGroup: false,
-    isWAContact: true,
-    tags: ["Empresa", "B2B"],
-    channels: {
-      whatsapp: "+55 11 88888-8888",
-      email: "contato@empresaabc.com",
-      phone: "+55 11 3333-3333",
-    },
-    lastInteraction: "2025-08-23T10:15:00Z",
-    totalTickets: 12,
-    createdAt: "2025-02-20T14:30:00Z",
-  },
-  {
-    id: 3,
-    name: "Maria Santos",
-    firstName: "Maria",
-    lastName: "Santos",
-    number: "+55 11 77777-7777",
-    email: "maria@email.com",
-    isGroup: false,
-    isWAContact: true,
-    pushname: "Maria",
-    telegramId: "@maria_santos",
-    instagramPK: "maria.santos.oficial",
-    birthdayDate: "1985-12-03",
-    tags: ["Cliente", "Ativo"],
-    channels: {
-      whatsapp: "+55 11 77777-7777",
-      telegram: "@maria_santos",
-      instagram: "maria.santos.oficial",
-      email: "maria@email.com",
-    },
-    lastInteraction: "2025-08-23T09:45:00Z",
-    totalTickets: 8,
-    createdAt: "2025-03-10T16:20:00Z",
-  },
-  {
-    id: 4,
-    name: "Grupo Vendas 2025",
-    isGroup: true,
-    isWAContact: true,
-    tags: ["Grupo", "Vendas"],
-    channels: {
-      whatsapp: "Grupo WhatsApp",
-    },
-    lastInteraction: "2025-08-23T08:20:00Z",
-    totalTickets: 3,
-    createdAt: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: 5,
-    name: "Pedro Costa",
-    firstName: "Pedro",
-    lastName: "Costa",
-    number: "+55 11 66666-6666",
-    isGroup: false,
-    isWAContact: false,
-    telegramId: "@pedro_costa",
-    tags: ["Prospect"],
-    channels: {
-      telegram: "@pedro_costa",
-    },
-    lastInteraction: "2025-08-22T15:30:00Z",
-    totalTickets: 2,
-    createdAt: "2025-07-05T11:45:00Z",
-  },
-]
-
+// Ícones dos canais
 function getChannelIcons(channels: Contact["channels"]) {
   const icons = []
   if (channels.whatsapp) icons.push(<MessageSquare key="wa" className="h-4 w-4 text-green-500" />)
@@ -160,6 +64,7 @@ function getChannelIcons(channels: Contact["channels"]) {
   return icons
 }
 
+// Formatações de datas
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   return date.toLocaleString("pt-BR", {
@@ -174,17 +79,53 @@ function formatDate(dateString: string) {
 function formatBirthday(dateString?: string) {
   if (!dateString) return null
   const date = new Date(dateString)
-  return date.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-  })
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
 }
 
 export function ContactsContent() {
-  const [contacts] = useState<Contact[]>(mockContacts)
+  const [contacts, setContacts] = useState<Contact[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [channelFilter, setChannelFilter] = useState("all")
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getContacts()
+      .then((data) => {
+        const contactsFromApi: Contact[] = data.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          businessName: c.businessName,
+          number: c.number ?? undefined, // garante que não seja null
+          email: c.email ?? undefined,
+          profilePicUrl: c.profilePicUrl,
+          isGroup: c.isGroup ?? false,
+          isWAContact: c.isWAContact ?? false,
+          pushname: c.pushname,
+          telegramId: c.telegramId ?? undefined,
+          instagramPK: c.instagramPK ?? undefined,
+          messengerId: c.messengerId,
+          birthdayDate: c.birthdayDate,
+          cpf: c.cpf,
+          tags: c.tags ?? [],
+          channels: {
+            whatsapp: c.isWAContact ? c.number ?? undefined : undefined,
+            email: c.email ?? undefined,
+            telegram: c.telegramId ?? undefined,
+            instagram: c.instagramPK ?? undefined,
+            phone: c.number ?? undefined,
+          },
+          lastInteraction: c.updatedAt ?? c.createdAt,
+          totalTickets: c.Tickets?.length ?? 0,
+          createdAt: c.createdAt,
+          Tickets: c.Tickets ?? [],
+        }))
+        setContacts(contactsFromApi)
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   const filteredContacts = contacts.filter((contact) => {
     const matchesSearch =
@@ -196,7 +137,7 @@ export function ContactsContent() {
 
     const matchesType =
       typeFilter === "all" ||
-      (typeFilter === "individual" && !contact.isGroup) ||
+      (typeFilter === "individual" && !contact.isGroup && !contact.businessName) ||
       (typeFilter === "group" && contact.isGroup) ||
       (typeFilter === "business" && contact.businessName)
 
@@ -216,6 +157,9 @@ export function ContactsContent() {
     business: contacts.filter((c) => c.businessName).length,
     groups: contacts.filter((c) => c.isGroup).length,
   }
+
+  if (loading) return <p className="text-white">Carregando contatos...</p>
+
 
   return (
     <div className="space-y-6">
