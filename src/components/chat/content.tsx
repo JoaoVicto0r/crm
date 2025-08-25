@@ -140,13 +140,13 @@ export function ChatContent() {
 
   // Recebe QR code
   socketRef.current.on("qrCode", (qr: string) => {
-    console.log("QR recebido:", qr);
-    if (qr) {
-      // Remove vírgulas ou caracteres extras para o QRCode
-      const cleanQr = qr.replace(/,/g, '');
-      setQrCode(cleanQr);
-    }
-  });
+  console.log("QR recebido:", qr);
+  if (qr) {
+    // Remove vírgulas e espaços extras
+    const cleanQr = qr.replace(/[, ]/g, '');
+    setQrCode(cleanQr);
+  }
+});
 
   // Recebe status de conexão
   socketRef.current.on("whatsapp:connected", () => {
