@@ -104,7 +104,7 @@ api.interceptors.response.use(
         } catch (err) {
           isRefreshing = false;
           await api.post("/auth/logout");
-          window.location.href = "/login";
+          window.location.href = "/";
           return Promise.reject(err);
         }
       }

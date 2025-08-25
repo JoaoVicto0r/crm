@@ -1,0 +1,29 @@
+*   [33m2fb576d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m resolvendo conflitos de merge
+[31m|[m[32m\[m  
+[31m|[m * [33m3b2e6af[m[33m ([m[1;31morigin/main[m[33m)[m new
+[31m|[m * [33mba502ac[m correct
+[31m|[m * [33m9151c98[m atualização
+[31m|[m * [33m3221cc1[m new
+[31m|[m * [33mb618cf9[m att
+[31m|[m * [33m63e747e[m update
+[31m|[m * [33m369cb65[m correção
+[31m|[m * [33mf101e71[m ticketscomponents itegração
+[31m|[m * [33m5ee17b8[m integração
+[31m|[m * [33m24fe000[m integração do tickets a API.ts
+[31m|[m * [33mbd13daf[m alteração de rota
+[31m|[m * [33m7890513[m correçaõ do logot
+[31m|[m * [33m067a4e7[m att
+[31m|[m * [33mea13f98[m correção
+[31m|[m * [33m867a463[m att
+[31m|[m * [33m7d8c072[m correção do user
+[31m|[m * [33m79c849c[m alteração da rota
+[31m|[m * [33m2fe26f8[m alteração co layout
+[31m|[m * [33m432ca68[m layout
+[31m|[m * [33m618a5e8[m att do layout
+[31m|[m * [33me18d5ec[m correção
+[31m|[m * [33m2621a37[m alteração da API.ts e adição dos campo para ser consumido no dashboard
+[31m|[m * [33mfa0ed3c[m alteração o dashboard para consumo da API
+* [32m|[m [33m2cc42e3[m minhas alterações locais
+[32m|[m[32m/[m  
+* [33mb63111e[m install to react
+* [33me2174e0[m first commit
