@@ -12,10 +12,10 @@ interface Ticket {
   id: string;
   contactId: number;
   status: string;
-  Messages: Message[]; // atenção: campo do Prisma é "Messages"
+  Messages: Message[];
 }
 
-export default function TicketsComponent() {
+export default function TicketsContent() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -39,10 +39,9 @@ export default function TicketsComponent() {
     try {
       await axios.post(`/api/tickets/${selectedTicket.id}/messages`, {
         body: newMessage,
-        fromMe: true, // ou false dependendo do remetente
-        userId: null, // ajuste se necessário
+        fromMe: true,
+        userId: null,
       });
-
       setNewMessage('');
       fetchTickets();
     } catch (err) {
