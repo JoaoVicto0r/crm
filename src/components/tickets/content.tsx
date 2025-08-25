@@ -40,7 +40,7 @@ export default function TicketsContent() {
       await axios.post(`/api/tickets/${selectedTicket.id}/messages`, {
         body: newMessage,
         fromMe: true,
-        userId: null, // ajuste se tiver usuário logado
+        userId: null, // ajuste conforme usuário logado
       });
       setNewMessage('');
       fetchTickets();
