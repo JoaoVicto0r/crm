@@ -2,33 +2,12 @@
 
 import { useState, useRef, useEffect } from "react"
 import io from "socket.io-client"
-import QRCode from "qrcode.react"
+import QRCode from "react-qr-code"
 import { Card } from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Badge } from "../../components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
-import {
-  Search,
-  Send,
-  Paperclip,
-  Smile,
-  MoreVertical,
-  Phone,
-  Video,
-  Info,
-  Archive,
-  Trash2,
-  UserX,
-  MessageSquare,
-  Clock,
-  Check,
-  CheckCheck,
-  ImageIcon,
-  FileText,
-  Mic,
-} from "lucide-react"
+import { Badge } from "../../components/ui/badge"
+import { MessageSquare, Send, ImageIcon, FileText, Clock, Check, CheckCheck } from "lucide-react"
 import { cn } from "../../lib/utils"
 
 // ----------- Tipagem de mensagens e tickets -----------
@@ -84,33 +63,17 @@ function getChannelIcon(channel: string) {
 
 function getStatusIcon(ack: number) {
   switch (ack) {
-    case 0:
-      return <Clock className="h-3 w-3 text-gray-400" />
-    case 1:
-      return <Check className="h-3 w-3 text-gray-400" />
-    case 2:
-      return <CheckCheck className="h-3 w-3 text-gray-400" />
-    case 3:
-      return <CheckCheck className="h-3 w-3 text-blue-500" />
-    default:
-      return null
+    case 0: return <Clock className="h-3 w-3 text-gray-400" />
+    case 1: return <Check className="h-3 w-3 text-gray-400" />
+    case 2: return <CheckCheck className="h-3 w-3 text-gray-400" />
+    case 3: return <CheckCheck className="h-3 w-3 text-blue-500" />
+    default: return null
   }
 }
 
 function formatTime(timestamp: string) {
   const date = new Date(timestamp)
   return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-}
-
-function formatLastSeen(timestamp?: string) {
-  if (!timestamp) return "Offline"
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-  if (diffInMinutes < 1) return "Agora mesmo"
-  if (diffInMinutes < 60) return `${diffInMinutes}min atrás`
-  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h atrás`
-  return date.toLocaleDateString("pt-BR")
 }
 
 // ----------- Componente ChatContent -----------
@@ -123,46 +86,37 @@ export function ChatContent() {
   const [whatsappConnected, setWhatsappConnected] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const socketRef = useRef<any>(null)
-  
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   useEffect(() => { scrollToBottom() }, [selectedTicket?.messages])
 
   // ----------- Conexão WebSocket -----------
   useEffect(() => {
-  socketRef.current = io("https://api-royal-production.up.railway.app"); // URL do backend
+    socketRef.current = io("https://api-royal-production.up.railway.app")
 
-  // Recebe nova mensagem
-  socketRef.current.on("newMessage", (msg: any) => {
-    console.log("Nova mensagem:", msg);
-    // Atualize o ticket correspondente aqui se quiser
-  });
+    socketRef.current.on("newMessage", (msg: any) => {
+      console.log("Nova mensagem:", msg)
+      // Atualize o ticket correspondente aqui se quiser
+    })
 
-  // Recebe QR code
-  socketRef.current.on("qrCode", (qr: string) => {
-    console.log("QR recebido:", qr);
-    if (qr) {
-      // Pega apenas a primeira parte do QR code
-      const cleanQr = qr.split(',')[0];
-      setQrCode(cleanQr);
-    }
-  });
+    socketRef.current.on("qrCode", (qr: string) => {
+      console.log("QR recebido:", qr)
+      if (qr) setQrCode(qr)
+    })
 
-  // Recebe status de conexão
-  socketRef.current.on("whatsapp:connected", () => {
-    setWhatsappConnected(true);
-    setQrCode(null);
-  });
+    socketRef.current.on("whatsapp:connected", () => {
+      setWhatsappConnected(true)
+      setQrCode(null)
+    })
 
-  return () => socketRef.current.disconnect();
-}, []);
-
+    return () => socketRef.current.disconnect()
+  }, [])
 
   const filteredTickets = tickets.filter(
     (ticket) =>
       ticket.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.contact.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()),
+      ticket.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleSendMessage = () => {
@@ -181,8 +135,7 @@ export function ChatContent() {
     setNewMessage("")
     scrollToBottom()
 
-    // Envia para backend
-    socketRef.current.emit("sendMessage", message)
+    socketRef.current?.emit("sendMessage", message)
   }
 
   return (
@@ -191,19 +144,18 @@ export function ChatContent() {
       {!whatsappConnected && (
         <Card className="flex flex-col items-center justify-center p-4 bg-gray-900 border-gray-800 w-80">
           <p className="text-white mb-2">Escaneie o QR code com WhatsApp Web</p>
-         {qrCode ? (
-          <QRCode value={qrCode} size={200} />
-        ) : (
-          <p className="text-gray-400">Aguardando QR code...</p>
-        )}
+          {qrCode ? (
+            <QRCode value={qrCode} size={200} />
+          ) : (
+            <p className="text-gray-400">Aguardando QR code...</p>
+          )}
         </Card>
       )}
 
-      {/* Chat List */}
+      {/* Lista de Chats */}
       <Card className="w-80 bg-gray-900 border-gray-800 flex flex-col">
         <div className="p-4 border-b border-gray-800">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Buscar conversas..."
               value={searchTerm}
@@ -219,7 +171,7 @@ export function ChatContent() {
               onClick={() => setSelectedTicket(ticket)}
               className={cn(
                 "p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800 transition-colors",
-                selectedTicket?.id === ticket.id && "bg-gray-800",
+                selectedTicket?.id === ticket.id && "bg-gray-800"
               )}
             >
               <div className="flex items-start space-x-3">
@@ -233,7 +185,6 @@ export function ChatContent() {
                   {ticket.contact.isOnline && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
                   )}
-                  <div className="absolute -bottom-1 -right-1">{getChannelIcon(ticket.channel)}</div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
@@ -247,7 +198,7 @@ export function ChatContent() {
                         "text-xs",
                         ticket.status === "open" && "bg-blue-600",
                         ticket.status === "pending" && "bg-yellow-600",
-                        ticket.status === "closed" && "bg-green-600",
+                        ticket.status === "closed" && "bg-green-600"
                       )}
                     >
                       {ticket.status === "open"
@@ -271,7 +222,6 @@ export function ChatContent() {
       {selectedTicket ? (
         <Card className="flex-1 bg-gray-900 border-gray-800 flex flex-col">
           {/* Chat Header e Messages... */}
-          {/* Mantenha o resto do seu layout de chat aqui */}
         </Card>
       ) : (
         <Card className="flex-1 bg-gray-900 border-gray-800 flex items-center justify-center">
