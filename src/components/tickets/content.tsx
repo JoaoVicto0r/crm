@@ -54,6 +54,7 @@ interface Ticket {
 }
 
 export default function TicketsContent() {
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | string>("all")
@@ -61,8 +62,9 @@ export default function TicketsContent() {
   // Fetch tickets da API
   const fetchTickets = async () => {
     try {
-      const dashboard: DashboardData = await api.get("/dashboard").then(res => res.data)
-      setTickets(dashboard.ticketsTable)
+      const data = await api.get<DashboardData>("/dashboard").then(res => res.data)
+      setDashboardData(data)
+      setTickets(data.ticketsTable || [])
     } catch (err) {
       console.error("Erro ao buscar tickets:", err)
     }
@@ -73,7 +75,7 @@ export default function TicketsContent() {
   }, [])
 
   // Filtros
-  const filteredTickets = tickets.filter((ticket) => {
+  const filteredTickets = (tickets || []).filter((ticket) => {
     const matchesSearch =
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.id.toString().includes(searchTerm)
