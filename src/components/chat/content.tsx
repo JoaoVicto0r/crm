@@ -138,8 +138,9 @@ export function ChatContent() {
     })
 
     // Recebe QR code
-    socketRef.current.on("whatsapp:qr", (qr: string) => {
-      setQrCode(qr)
+    socketRef.current.on("qrCode", (qr: string) => {
+      console.log("QR recebido:", qr);
+      setQrCode(qr);
     })
 
     // Recebe status de conexão
