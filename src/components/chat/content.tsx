@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import io from "socket.io-client"
+import QRCode from "qrcode.react"
 import { Card } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -29,12 +31,13 @@ import {
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 
+// ----------- Tipagem de mensagens e tickets -----------
 interface Message {
   id: string
   body: string
   fromMe: boolean
   timestamp: string
-  ack: number // 0: sending, 1: sent, 2: delivered, 3: read
+  ack: number
   mediaType?: "image" | "document" | "audio" | "video"
   mediaUrl?: string
   contactId: number
@@ -58,185 +61,35 @@ interface ChatTicket {
   channel: "whatsapp" | "telegram" | "instagram" | "email"
 }
 
+// ----------- Mock tickets -----------
 const mockTickets: ChatTicket[] = [
-  {
-    id: 1001,
-    contactId: 1,
-    contact: {
-      name: "João Silva",
-      number: "+55 11 99999-9999",
-      profilePicUrl: "/placeholder.svg?height=40&width=40",
-      isOnline: true,
-    },
-    status: "open",
-    unreadMessages: 2,
-    lastMessage: "Preciso de ajuda urgente com o pagamento",
-    lastMessageTime: "2025-08-23T11:45:00Z",
-    channel: "whatsapp",
-    messages: [
-      {
-        id: "1",
-        body: "Olá! Como posso ajudá-lo?",
-        fromMe: true,
-        timestamp: "2025-08-23T10:30:00Z",
-        ack: 3,
-        contactId: 1,
-      },
-      {
-        id: "2",
-        body: "Oi! Estou com problema no pagamento da minha fatura",
-        fromMe: false,
-        timestamp: "2025-08-23T10:32:00Z",
-        ack: 3,
-        contactId: 1,
-      },
-      {
-        id: "3",
-        body: "Vou verificar isso para você. Pode me informar o número da fatura?",
-        fromMe: true,
-        timestamp: "2025-08-23T10:35:00Z",
-        ack: 3,
-        contactId: 1,
-      },
-      {
-        id: "4",
-        body: "Claro! É a fatura #12345",
-        fromMe: false,
-        timestamp: "2025-08-23T10:37:00Z",
-        ack: 3,
-        contactId: 1,
-      },
-      {
-        id: "5",
-        body: "Preciso de ajuda urgente com o pagamento",
-        fromMe: false,
-        timestamp: "2025-08-23T11:45:00Z",
-        ack: 2,
-        contactId: 1,
-      },
-    ],
-  },
-  {
-    id: 1002,
-    contactId: 2,
-    contact: {
-      name: "Maria Santos",
-      number: "+55 11 88888-8888",
-      profilePicUrl: "/placeholder.svg?height=40&width=40",
-      isOnline: false,
-      lastSeen: "2025-08-23T09:30:00Z",
-    },
-    status: "pending",
-    unreadMessages: 1,
-    lastMessage: "Obrigada pela informação!",
-    lastMessageTime: "2025-08-23T09:15:00Z",
-    channel: "whatsapp",
-    messages: [
-      {
-        id: "6",
-        body: "Gostaria de saber mais sobre os planos disponíveis",
-        fromMe: false,
-        timestamp: "2025-08-23T09:00:00Z",
-        ack: 3,
-        contactId: 2,
-      },
-      {
-        id: "7",
-        body: "Claro! Temos 3 planos principais: Básico, Intermediário e Premium. Qual seria o seu interesse?",
-        fromMe: true,
-        timestamp: "2025-08-23T09:05:00Z",
-        ack: 3,
-        contactId: 2,
-      },
-      {
-        id: "8",
-        body: "Obrigada pela informação!",
-        fromMe: false,
-        timestamp: "2025-08-23T09:15:00Z",
-        ack: 3,
-        contactId: 2,
-      },
-    ],
-  },
-  {
-    id: 1003,
-    contactId: 3,
-    contact: {
-      name: "Pedro Costa",
-      number: "@pedro_costa",
-      isOnline: false,
-      lastSeen: "2025-08-22T18:00:00Z",
-    },
-    status: "closed",
-    unreadMessages: 0,
-    lastMessage: "Problema resolvido, obrigado!",
-    lastMessageTime: "2025-08-22T15:30:00Z",
-    channel: "telegram",
-    messages: [
-      {
-        id: "9",
-        body: "Estou com dificuldades para acessar minha conta",
-        fromMe: false,
-        timestamp: "2025-08-22T15:00:00Z",
-        ack: 3,
-        contactId: 3,
-      },
-      {
-        id: "10",
-        body: "Vou ajudá-lo com isso. Pode tentar fazer o reset da senha?",
-        fromMe: true,
-        timestamp: "2025-08-22T15:05:00Z",
-        ack: 3,
-        contactId: 3,
-      },
-      {
-        id: "11",
-        body: "Problema resolvido, obrigado!",
-        fromMe: false,
-        timestamp: "2025-08-22T15:30:00Z",
-        ack: 3,
-        contactId: 3,
-      },
-    ],
-  },
+  // ... coloque aqui todos os mockTickets que você já tinha
 ]
 
+// ----------- Helpers -----------
 function getChannelIcon(channel: string) {
   switch (channel) {
-    case "whatsapp":
-      return <MessageSquare className="h-4 w-4 text-green-500" />
-    case "telegram":
-      return <Send className="h-4 w-4 text-blue-500" />
-    case "instagram":
-      return <ImageIcon className="h-4 w-4 text-pink-500" />
-    case "email":
-      return <FileText className="h-4 w-4 text-red-500" />
-    default:
-      return <MessageSquare className="h-4 w-4" />
+    case "whatsapp": return <MessageSquare className="h-4 w-4 text-green-500" />
+    case "telegram": return <Send className="h-4 w-4 text-blue-500" />
+    case "instagram": return <ImageIcon className="h-4 w-4 text-pink-500" />
+    case "email": return <FileText className="h-4 w-4 text-red-500" />
+    default: return <MessageSquare className="h-4 w-4" />
   }
 }
 
 function getStatusIcon(ack: number) {
   switch (ack) {
-    case 0:
-      return <Clock className="h-3 w-3 text-gray-400" />
-    case 1:
-      return <Check className="h-3 w-3 text-gray-400" />
-    case 2:
-      return <CheckCheck className="h-3 w-3 text-gray-400" />
-    case 3:
-      return <CheckCheck className="h-3 w-3 text-blue-500" />
-    default:
-      return null
+    case 0: return <Clock className="h-3 w-3 text-gray-400" />
+    case 1: return <Check className="h-3 w-3 text-gray-400" />
+    case 2: return <CheckCheck className="h-3 w-3 text-gray-400" />
+    case 3: return <CheckCheck className="h-3 w-3 text-blue-500" />
+    default: return null
   }
 }
 
 function formatTime(timestamp: string) {
   const date = new Date(timestamp)
-  return date.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
 }
 
 function formatLastSeen(timestamp?: string) {
@@ -244,27 +97,40 @@ function formatLastSeen(timestamp?: string) {
   const date = new Date(timestamp)
   const now = new Date()
   const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-
   if (diffInMinutes < 1) return "Agora mesmo"
   if (diffInMinutes < 60) return `${diffInMinutes}min atrás`
   if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h atrás`
   return date.toLocaleDateString("pt-BR")
 }
 
+// ----------- Componente ChatContent -----------
 export function ChatContent() {
   const [tickets] = useState<ChatTicket[]>(mockTickets)
   const [selectedTicket, setSelectedTicket] = useState<ChatTicket | null>(tickets[0])
   const [searchTerm, setSearchTerm] = useState("")
   const [newMessage, setNewMessage] = useState("")
+  const [qrCode, setQrCode] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const socketRef = useRef<any>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
 
+  useEffect(() => { scrollToBottom() }, [selectedTicket?.messages])
+
+  // ----------- Conexão WebSocket -----------
   useEffect(() => {
-    scrollToBottom()
-  }, [selectedTicket?.messages])
+    socketRef.current = io("https://api-royal-production.up.railway.app") // ajuste conforme backend
+
+    socketRef.current.on("newMessage", (msg: any) => {
+      console.log("Nova mensagem:", msg)
+    })
+
+    socketRef.current.on("qrCode", (qr: string) => {
+      setQrCode(qr)
+    })
+
+    return () => socketRef.current.disconnect()
+  }, [])
 
   const filteredTickets = tickets.filter(
     (ticket) =>
@@ -285,7 +151,6 @@ export function ChatContent() {
       contactId: selectedTicket.contactId,
     }
 
-    // In a real app, this would be handled by state management
     selectedTicket.messages.push(message)
     setNewMessage("")
     scrollToBottom()
