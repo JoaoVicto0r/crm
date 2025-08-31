@@ -63,7 +63,7 @@ export interface Contact {
 
 // ====================== INSTANCE ======================
 const api = axios.create({
-  baseURL: "https://api-royal-production.up.railway.app",
+  baseURL: "http://serverapiroyal.ddns.net",
   withCredentials: true,
 });
 
