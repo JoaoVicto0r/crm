@@ -63,7 +63,7 @@ export interface Contact {
 
 // ====================== INSTANCE ======================
 const api = axios.create({
-  baseURL: "http://serverapiroyal.ddns.net",
+  baseURL: "https://api-royal-hngp.onrender.com",
   withCredentials: true,
 });
 

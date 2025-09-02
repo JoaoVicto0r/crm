@@ -4,7 +4,7 @@ let socket: Socket;
 
 export const connectSocket = () => {
   if (!socket) {
-    socket = io("https://api-royal-production.up.railway.app0"); 
+    socket = io("https://api-royal-hngp.onrender.com"); 
   }
   return socket;
 };
