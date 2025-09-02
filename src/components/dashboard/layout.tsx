@@ -69,7 +69,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         setUser(data)
       } catch (err: any) {
         console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
-        router.push("/login")
+        router.push("/")
       } finally {
         setLoading(false)
       }
