@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'https://api-royal-production.up.railway.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE as string;
 
 export const getTickets = async (tenantId: number) => {
   const response = await axios.get(`${API_BASE}/tickets`, {

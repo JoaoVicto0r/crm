@@ -1,5 +1,5 @@
 // src/utils/api.ts
-import axios from "axios";
+import axios from 'axios';
 
 // ====================== TYPES ======================
 export interface User {
@@ -60,27 +60,26 @@ export interface Contact {
   updatedAt: string;
 }
 
-
 // ====================== INSTANCE ======================
 const api = axios.create({
-  baseURL: "http://serverapiroyal.ddns.net",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   withCredentials: true,
 });
 
 // ====================== USERS ======================
 export const getUsers = async (): Promise<User[]> => {
-  const { data } = await api.get<User[]>("/users");
+  const { data } = await api.get<User[]>('/users');
   return data;
 };
 
 export const login = async (email: string, password: string): Promise<User> => {
-  const { data } = await api.post<User>("/auth/login", { email, password });
+  const { data } = await api.post<User>('/auth/login', { email, password });
   return data;
 };
 
 // ====================== DASHBOARD ======================
 export const getDashboardData = async (): Promise<DashboardData> => {
-  const { data } = await api.get("/dashboard");
+  const { data } = await api.get('/dashboard');
   // Suporte para wrapper { dashboard: {...} } ou objeto direto
   if (data.dashboard) return data.dashboard as DashboardData;
   return data as DashboardData;
@@ -89,10 +88,9 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 // ====================== CONTACTS ======================
 
 export const getContacts = async (): Promise<Contact[]> => {
-  const { data } = await api.get<Contact[]>("/contacts");
+  const { data } = await api.get<Contact[]>('/contacts');
   return data;
 };
-
 
 // ====================== REFRESH TOKEN ======================
 let isRefreshing = false;
@@ -119,13 +117,13 @@ api.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          await api.post("/auth/refresh");
+          await api.post('/auth/refresh');
           isRefreshing = false;
           onTokenRefreshed();
         } catch (err) {
           isRefreshing = false;
-          await api.post("/auth/logout");
-          window.location.href = "/";
+          await api.post('/auth/logout');
+          window.location.href = '/';
           return Promise.reject(err);
         }
       }
