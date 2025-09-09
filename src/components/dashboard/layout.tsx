@@ -59,12 +59,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-  // Buscar usuário logado
+  /* ===========================
+   🧑 BUSCAR USER LOGADOS
+   =========================== */
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const { data } = await axios.get<User>(`${API_URL}/users/me`, {
-          withCredentials: true, // envia cookies/sessão
+          withCredentials: true, 
         })
         setUser(data)
       } catch (err: any) {
@@ -77,7 +79,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     fetchUser()
   }, [router, API_URL])
 
-  // Função de logout
+  /* ===========================
+   FUNÇÃO DE LOGOUT
+   =========================== */
   const handleLogout = async () => {
     try {
       await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true })
@@ -111,7 +115,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* ===========================
+              SIDEBAR
+   =========================== */}
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0",
@@ -119,7 +125,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
+          {/* ===========================
+                LOGO
+   =========================== */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
