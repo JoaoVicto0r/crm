@@ -1,5 +1,10 @@
-// src/utils/api.ts
 import axios from 'axios';
+
+// ====================== INSTANCE ======================
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL ,
+  withCredentials: true,
+});
 
 // ====================== TYPES ======================
 export interface User {
@@ -18,18 +23,15 @@ export interface DashboardData {
   tempoMedio: string;
   taxaResolucao: number;
 
-  // Gráficos
   weeklyData: { day: string; tickets: number; messages: number }[];
   hourlyData: { hour: string; count: number }[];
 
-  // Pies
   statusData: { name: string; value: number; color: string }[];
   userAttendanceData: { name: string; value: number; color: string }[];
   channelData: { name: string; value: number; color: string }[];
   connectionData: { name: string; value: number; color: string }[];
   demandData: { name: string; value: number; color: string }[];
 
-  // Tabelas (exemplo)
   ticketsTable: {
     id: number;
     title: string;
@@ -60,14 +62,20 @@ export interface Contact {
   updatedAt: string;
 }
 
-// ====================== INSTANCE ======================
-const api = axios.create({
-
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
 
 
-  withCredentials: true,
-});
+/*=================================================
+                     KANBAN
+  ================================================= */
+export const showAllTicketInformation = async () => {
+  const { data } = await api.get('/tickets'); 
+  return data;
+};
+
+export const showContact = async (contactId: number) => {
+  const { data } = await api.get(`/contacts/${contactId}`);
+  return data;
+};
 
 // ====================== USERS ======================
 export const getUsers = async (): Promise<User[]> => {
@@ -83,13 +91,11 @@ export const login = async (email: string, password: string): Promise<User> => {
 // ====================== DASHBOARD ======================
 export const getDashboardData = async (): Promise<DashboardData> => {
   const { data } = await api.get('/dashboard');
-  // Suporte para wrapper { dashboard: {...} } ou objeto direto
   if (data.dashboard) return data.dashboard as DashboardData;
   return data as DashboardData;
 };
 
 // ====================== CONTACTS ======================
-
 export const getContacts = async (): Promise<Contact[]> => {
   const { data } = await api.get<Contact[]>('/contacts');
   return data;
@@ -107,8 +113,18 @@ const onTokenRefreshed = () => {
   refreshSubscribers.forEach((cb) => cb());
   refreshSubscribers = [];
 };
+/*===================== KANBAN - HOOKS ====================== */
+export async function createTicket(ticketData: any) {
+  return api.post("/tickets", ticketData);
+}
+export async function setQueue(ticketId: number, queueId: number) {
+  return api.put(`/tickets/${ticketId}/queue`, { queueId });
+}
 
-// Interceptor
+export async function setTicketInfo(ticketId: number, info: any) {
+  return api.put(`/tickets/${ticketId}/info`, info);
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: any) => {
