@@ -22,13 +22,16 @@ import { useKanban } from "../../hooks/use-kanban"
 import { CreateCardModal } from "./create-card-modal"
 import React from "react";
 
-export interface Ticket{
-    id:number;
-    title:string;
-    status:string;
-    contactId:number;
+export interface Ticket {
+  id: number;
+  title: string;
+  status: string;
+  contactId: number;
 }
 
+/* ===================================================
+                  Estrutura do card do kanban
+   =================================================== */
 export interface KanbanCard {
   id: string
   title: string
@@ -44,14 +47,17 @@ export interface KanbanCard {
   createdAt?: string
   completedAt?: string
 }
-
+/*================================================ */
+/* ===================================================
+                  Estrutura da coluna do kanban
+   =================================================== */
 export interface KanbanColumn {
   id: string
   title: string
   cards: KanbanCard[]
   color: string
 }
-
+/*================================================ */
 function DraggableCard({ card }: { card: KanbanCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id })
 
@@ -99,9 +105,8 @@ function DraggableCard({ card }: { card: KanbanCard }) {
     <Card
       ref={setNodeRef}
       style={style}
-      className={`p-4 hover:shadow-md transition-shadow cursor-pointer ${
-        isDragging ? "opacity-50 rotate-3 scale-105" : ""
-      }`}
+      className={`p-4 hover:shadow-md transition-shadow cursor-pointer ${isDragging ? "opacity-50 rotate-3 scale-105" : ""
+        }`}
     >
       <div className="space-y-3">
         <div className="flex items-start justify-between">
@@ -167,9 +172,8 @@ function DraggableCard({ card }: { card: KanbanCard }) {
 
           {card.dueDate && (
             <div
-              className={`flex items-center space-x-1 text-xs ${
-                isOverdue(card.dueDate) ? "text-red-500" : "text-muted-foreground"
-              }`}
+              className={`flex items-center space-x-1 text-xs ${isOverdue(card.dueDate) ? "text-red-500" : "text-muted-foreground"
+                }`}
             >
               <Calendar className="h-3 w-3" />
               <span>{new Date(card.dueDate).toLocaleDateString("pt-BR")}</span>
@@ -203,7 +207,7 @@ function DroppableColumn({ column, onAddCard }: { column: KanbanColumn; onAddCar
           </div>
         </CardHeader>
         <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
-          <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={column.cards.map((card) => card.id)} strategy={verticalListSortingStrategy} id={column.id}>
             {column.cards.map((card) => (
               <DraggableCard key={card.id} card={card} />
             ))}
@@ -250,24 +254,25 @@ export function KanbanInterface() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-
     if (!over) {
       setActiveCard(null)
       return
     }
 
     const activeCardId = active.id as string
-    const overColumnId = over.id as string
+    const sourceColumn = columns.find((col) =>
+      col.cards.some((card) => card.id === activeCardId)
+    )
 
-    const sourceColumn = columns.find((col) => col.cards.some((card) => card.id === activeCardId))
+    const destinationColumnId = over.id as string
 
-    if (!sourceColumn || sourceColumn.id === overColumnId) {
+    if (!sourceColumn || sourceColumn.id === destinationColumnId) {
       setActiveCard(null)
       return
     }
 
     try {
-      await moveCard(activeCardId, sourceColumn.id, overColumnId)
+      await moveCard(activeCardId, sourceColumn.id, destinationColumnId)
     } catch (error) {
       console.error("Erro ao mover card:", error)
     }
