@@ -92,7 +92,7 @@ export function ChatContent() {
 
   // ----------- Conexão WebSocket -----------
   useEffect(() => {
-    socketRef.current = io("https://api-royal-production.up.railway.app")
+    socketRef.current = io("https://api-royal-hngp.onrender.com")
 
     socketRef.current.on("newMessage", (msg: any) => {
       console.log("Nova mensagem:", msg)
