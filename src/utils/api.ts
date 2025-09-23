@@ -81,10 +81,15 @@ export const login = async (email: string, password: string): Promise<User> => {
 };
 
 // ====================== DASHBOARD ======================
-export const getDashboardData = async (): Promise<DashboardData> => {
-  const { data } = await api.get('/dashboard');
-  // Suporte para wrapper { dashboard: {...} } ou objeto direto
-  if (data.dashboard) return data.dashboard as DashboardData;
+export const getDashboardData = async (
+  start?: string,
+  end?: string
+): Promise<DashboardData> => {
+  const params = new URLSearchParams();
+  if (start) params.append('start', start);
+  if (end) params.append('end', end);
+
+  const { data } = await api.get(`/dashboard?${params.toString()}`);
   return data as DashboardData;
 };
 
@@ -92,6 +97,78 @@ export const getDashboardData = async (): Promise<DashboardData> => {
 
 export const getContacts = async (): Promise<Contact[]> => {
   const { data } = await api.get<Contact[]>('/contacts');
+  return data;
+};
+
+// ====================== PIPELINE ======================
+
+export interface Opportunity {
+  id: number;
+  title: string;
+  stageId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Stage {
+  id: number;
+  name: string;
+  opportunities: Opportunity[];
+}
+
+export interface Pipeline {
+  id: number;
+  name: string;
+  stages: Stage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Buscar todos os pipelines (com stages e oportunidades)
+// export const getPipelines = async (): Promise<Pipeline[]> => {
+//   const { data } = await api.get<Pipeline[]>('/pipeline/pipelines');
+//   return data;
+// };
+
+export const getPipelines = async (): Promise<Pipeline[]> => {
+  const { data } = await api.get<Pipeline[]>('/pipeline'); // ✅ em vez de /pipeline/pipelines
+  return data;
+};
+
+// Criar pipeline
+export const createPipeline = async (payload: { name: string }) => {
+  const { data } = await api.post<Pipeline>('/pipeline', payload);
+  return data;
+};
+
+// Atualizar pipeline
+export const updatePipeline = async (
+  id: number,
+  payload: Partial<{ name: string }>
+) => {
+  const { data } = await api.put<Pipeline>(`/pipeline/${id}`, payload);
+  return data;
+};
+
+// Remover pipeline
+export const deletePipeline = async (id: number) => {
+  await api.delete(`/pipeline/${id}`);
+};
+
+// Mover oportunidade para outro estágio
+// export const moveOpportunity = async (id: number, stageId: number) => {
+//   const { data } = await api.put(`/pipeline/${id}/mover`, { stageId });
+//   return data;
+// };
+
+// export const moveOpportunity = async (id: number, stageId: number) => {
+//   const { data } = await api.put(`/pipeline/${id}/move`, { stageId });
+//   return data;
+// };
+
+// CORRIJA em src/utils/api.ts
+export const moveOpportunity = async (id: number, stageId: number) => {
+  const { data } = await api.put(`/pipeline/${id}/move`, { stageId }); // ← mudar para "mover"
   return data;
 };
 
