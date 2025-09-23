@@ -73,14 +73,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     const fetchUser = async () => {
       try {
         const { data } = await axios.get<User>(`${API_URL}/users/me`, {
-      feature/funil-frontend-tela
           withCredentials: true, 
         })
         setUser(data)
       } catch (err: any) {
         console.error("Erro ao buscar usuário logado:", err.response?.data || err.message)
         router.push("/")
-         main
       } finally {
         setLoading(false);
       }
