@@ -22,12 +22,12 @@ import type { KanbanCard } from "./kanban-interface"
 
 interface CreateCardModalProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreateCard: (card: Omit<KanbanCard, "id">) => void
+  onOpenChangeAction: (open: boolean) => void
+  onCreateCardAction: (card: Omit<KanbanCard, "id">) => void
   columnId: string
 }
 
-export function CreateCardModal({ open, onOpenChange, onCreateCard, columnId }: CreateCardModalProps) {
+export function CreateCardModal({ open, onOpenChangeAction, onCreateCardAction, columnId }: CreateCardModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -44,7 +44,7 @@ export function CreateCardModal({ open, onOpenChange, onCreateCard, columnId }: 
 
     if (!formData.title.trim()) return
 
-    onCreateCard({
+    onCreateCardAction({
       title: formData.title,
       description: formData.description || undefined,
       assignedTo: formData.assignedTo || undefined,
@@ -66,7 +66,7 @@ export function CreateCardModal({ open, onOpenChange, onCreateCard, columnId }: 
       tags: [],
     })
     setNewTag("")
-    onOpenChange(false)
+    onOpenChangeAction(false)
   }
 
   const addTag = () => {
@@ -102,7 +102,7 @@ export function CreateCardModal({ open, onOpenChange, onCreateCard, columnId }: 
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChangeAction}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
@@ -214,7 +214,7 @@ export function CreateCardModal({ open, onOpenChange, onCreateCard, columnId }: 
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChangeAction(false)}>
               Cancelar
             </Button>
             <Button type="submit">Criar Tarefa</Button>

@@ -86,12 +86,11 @@ export function useKanban() {
 
         if (cardData.title) {
           await createTicket({
-            id: newCard.id,
             title: cardData.title,
             description: cardData.description || "",
             priority: cardData.priority,
             status: "open",
-            contactId: "1", 
+            contactId: cardData.contactId ?? 1, 
             assignedTo: cardData.assignedTo,
           })
         }

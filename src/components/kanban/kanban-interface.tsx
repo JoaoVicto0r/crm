@@ -46,6 +46,7 @@ export interface KanbanCard {
   status?: "todo" | "in-progress" | "review" | "done"
   createdAt?: string
   completedAt?: string
+  contactId?: number
 }
 /*================================================ */
 /* ===================================================
@@ -343,8 +344,8 @@ export function KanbanInterface() {
 
       <CreateCardModal
         open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        onCreateCard={handleCreateCard}
+        onOpenChangeAction={setCreateModalOpen}
+        onCreateCardAction={handleCreateCard}
         columnId={selectedColumnId}
       />
     </>
