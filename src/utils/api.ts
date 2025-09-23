@@ -78,10 +78,15 @@ export const login = async (email: string, password: string): Promise<User> => {
 };
 
 // ====================== DASHBOARD ======================
-export const getDashboardData = async (): Promise<DashboardData> => {
-  const { data } = await api.get('/dashboard');
-  // Suporte para wrapper { dashboard: {...} } ou objeto direto
-  if (data.dashboard) return data.dashboard as DashboardData;
+export const getDashboardData = async (
+  start?: string,
+  end?: string
+): Promise<DashboardData> => {
+  const params = new URLSearchParams();
+  if (start) params.append('start', start);
+  if (end) params.append('end', end);
+
+  const { data } = await api.get(`/dashboard?${params.toString()}`);
   return data as DashboardData;
 };
 
@@ -160,7 +165,7 @@ export const deletePipeline = async (id: number) => {
 
 // CORRIJA em src/utils/api.ts
 export const moveOpportunity = async (id: number, stageId: number) => {
-  const { data } = await api.put(`/pipeline/${id}/mover`, { stageId }); // ← mudar para "mover"
+  const { data } = await api.put(`/pipeline/${id}/move`, { stageId }); // ← mudar para "mover"
   return data;
 };
 
